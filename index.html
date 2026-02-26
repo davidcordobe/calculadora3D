@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora 3D</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Impresión 3D</h1>
+        <form id="calcForm">
+            <label>Material utilizado:
+                <select id="material" required>
+                    <option value="PLA ELEGOO">PLA ELEGOO</option>
+                    <option value="PTEG ELEGOO">PTEG ELEGOO</option>
+                    <option value="PLA 3N">PLA 3N</option>
+                </select>
+            </label>
+            <label>Precio del material (por kg):
+                <input type="number" id="precioMaterial" step="0.01" required>
+            </label>
+            <label>Gramos de filamento usado:
+                <input type="number" id="gramos" step="0.01" required>
+            </label>
+            <label>Horas de impresión:
+                <input type="number" id="horas" step="0.01" required>
+            </label>
+            <label>Precio de la luz (por kWh):
+                <input type="number" id="precioLuz" step="0.01" value="500" readonly>
+            </label>
+            <label>Consumo de la impresora (W):
+                <input type="number" id="consumo" step="0.01" value="300" readonly>
+            </label>
+            <label>Gasto extra ($):
+                <input type="number" id="gastoExtra" step="0.01" value="0">
+            </label>
+            <label>Porcentaje de ganancia (%):
+                <input type="number" id="ganancia" step="0.01" required>
+            </label>
+            <button type="submit">Calcular</button>
+        </form>
+        <div id="resultados"></div>
+    </div>
+    <canvas id="fireworksCanvas" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:0;"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
