@@ -11,9 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 
 <link rel="manifest" href="manifest.json">
-
 <meta name="theme-color" content="#020617">
-
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -31,16 +29,11 @@
 
 </header>
 
-
 <div class="grid">
 
-<!-- DATOS -->
+<div class="panel">
 
-<div class="panel trabajo">
-
-<details open>
-
-<summary>Datos del trabajo</summary>
+<h3>Datos del trabajo</h3>
 
 <label>Cliente</label>
 <input id="cliente">
@@ -64,22 +57,19 @@
 <h2 id="precioFinal"></h2>
 
 <h3>Referencia de precios</h3>
+
 <div id="cotizacion"></div>
 
 <button id="pdf">Descargar PDF</button>
 
-</details>
+<button id="whatsapp">Enviar por WhatsApp</button>
 
 </div>
 
 
-<!-- GASTOS -->
+<div class="panel">
 
-<div class="panel gastos">
-
-<details>
-
-<summary>Gastos</summary>
+<h3>Gastos</h3>
 
 <label>Precio Kwh</label>
 <input id="precioLuz" value="500">
@@ -101,8 +91,6 @@
 
 <label>Precio mínimo</label>
 <input id="minimo" value="1000">
-
-</details>
 
 </div>
 
