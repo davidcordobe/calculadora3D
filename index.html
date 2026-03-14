@@ -6,9 +6,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculadora Profesional Impresión 3D</title>
+<title>Calculadora Impresión 3D</title>
 
 <link rel="stylesheet" href="styles.css">
+
 <link rel="manifest" href="manifest.json">
 
 <meta name="theme-color" content="#020617">
@@ -16,7 +17,6 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -27,25 +27,23 @@
 <header>
 
 <img src="logo.png" class="logo">
-<h1>Calculadora Profesional Impresión 3D</h1>
+<h1>Calculadora Impresión 3D</h1>
 
 </header>
 
+
 <div class="grid">
 
-<div class="panel">
+<!-- DATOS -->
 
-<h3>Datos del trabajo</h3>
+<div class="panel trabajo">
+
+<details open>
+
+<summary>Datos del trabajo</summary>
 
 <label>Cliente</label>
 <input id="cliente">
-
-<label>Tipo de cliente</label>
-<select id="tipoCliente">
-<option value="normal">Cliente normal</option>
-<option value="mayorista">Mayorista</option>
-<option value="promo">Promo / llaveros</option>
-</select>
 
 <label>Material</label>
 <select id="material"></select>
@@ -59,11 +57,6 @@
 <label>Minutos</label>
 <input id="minutos" type="number">
 
-<label>Filamento restante (g)</label>
-<input id="filamentoRestante" value="1000">
-
-<div id="alertaFilamento"></div>
-
 <button id="calcular">Calcular</button>
 
 <div id="resultado"></div>
@@ -73,17 +66,20 @@
 <h3>Referencia de precios</h3>
 <div id="cotizacion"></div>
 
-<button id="guardarTrabajo">Guardar impresión</button>
+<button id="pdf">Descargar PDF</button>
 
-<button id="pdf">Descargar presupuesto</button>
-
-<button id="whatsapp">Enviar WhatsApp</button>
+</details>
 
 </div>
 
-<div class="panel">
 
-<h3>Gastos</h3>
+<!-- GASTOS -->
+
+<div class="panel gastos">
+
+<details>
+
+<summary>Gastos</summary>
 
 <label>Precio Kwh</label>
 <input id="precioLuz" value="500">
@@ -104,22 +100,13 @@
 <input id="fallos" value="10">
 
 <label>Precio mínimo</label>
-<input id="minimo" value="3000">
+<input id="minimo" value="1000">
 
-<h3>Estadísticas</h3>
-<div id="estadisticas"></div>
-
-<h3>Ganancias</h3>
-<canvas id="graficoGanancias"></canvas>
+</details>
 
 </div>
 
 </div>
-
-<h3>Historial</h3>
-<div id="historial"></div>
-
-<button id="borrarHistorial">Borrar historial</button>
 
 </div>
 
