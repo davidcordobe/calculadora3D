@@ -1,32 +1,50 @@
 body{
 
 font-family:Arial;
-margin:0;
 background:#0f172a;
 color:white;
-
-}
-
-header{
-
-text-align:center;
+display:flex;
+justify-content:center;
 padding:20px;
-background:#020617;
 
 }
 
 .container{
 
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:20px;
-padding:20px;
+width:100%;
+max-width:1200px;
+background:#020617;
+padding:25px;
+border-radius:10px;
 
 }
 
-.card{
+header{
 
-background:#1e293b;
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:20px;
+
+}
+
+.logo{
+
+width:60px;
+
+}
+
+.grid{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+
+}
+
+.panel{
+
+background:#0b1220;
 padding:20px;
 border-radius:10px;
 
@@ -35,65 +53,51 @@ border-radius:10px;
 input,select{
 
 width:100%;
-padding:10px;
-margin-top:8px;
-margin-bottom:12px;
+padding:8px;
+margin-bottom:10px;
+border-radius:5px;
 border:none;
-border-radius:6px;
 
 }
 
 button{
 
 width:100%;
-padding:12px;
-background:#22c55e;
+padding:10px;
+margin-top:10px;
+background:#2563eb;
 border:none;
-border-radius:6px;
 color:white;
-font-weight:bold;
+border-radius:6px;
 cursor:pointer;
 
 }
 
-.time{
+button:hover{
 
-display:flex;
-gap:10px;
+background:#1d4ed8;
 
 }
 
-@media(max-width:800px){
+#precioFinal{
 
-.container{
+font-size:34px;
+color:#22c55e;
 
+}
+
+#estadisticas{
+
+background:#111827;
+padding:10px;
+border-radius:6px;
+
+}
+
+@media(max-width:700px){
+
+.grid{
 grid-template-columns:1fr;
-
 }
-
-}
-
-.header{
-
-text-align:center;
-padding:20px;
-background:#020617;
-
-}
-
-.logoTitulo{
-
-display:flex;
-align-items:center;
-justify-content:center;
-gap:15px;
-
-}
-
-.logo{
-
-width:50px;
-height:50px;
-object-fit:contain;
 
 }
