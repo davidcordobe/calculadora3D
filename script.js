@@ -225,6 +225,12 @@ let mensaje=
 Cliente: ${cliente}
 
 Precio: $${precio.toFixed(2)}
+
+Tiempo de entrega estimado 3 a 5 días
+
+Gracias por confiar en nuestro servicio
+
+Presupuesto valido por 7 días
 `
 
 let url="https://wa.me/?text="+encodeURIComponent(mensaje)
