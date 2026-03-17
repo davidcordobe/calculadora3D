@@ -10,9 +10,9 @@
 
 <link rel="stylesheet" href="styles.css">
 
-<link rel="manifest" href="manifest.json">
+<!-- <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#020617">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png"> -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -23,10 +23,8 @@
 <div class="container">
 
 <header>
-
 <img src="logo.png" class="logo">
-<h1>Calculadora Impresión 3D</h1>
-
+<h1>Norte, Nudo, Next</h1>
 </header>
 
 <div class="grid">
@@ -35,14 +33,28 @@
 
 <h3>Datos del trabajo</h3>
 
+
 <label>Cliente</label>
 <input id="cliente">
 
+<h3>Productos</h3>
+
+<div class="tablaProductos">
+
+<div class="fila encabezado">
+<div>Producto</div>
+<div>Gramos</div>
+<div></div>
+</div>
+
+<div id="productos"></div>
+
+</div>
+
+<button id="agregarProducto" type="button">+ Agregar producto</button>
+
 <label>Material</label>
 <select id="material"></select>
-
-<label>Gramos</label>
-<input id="gramos" type="number">
 
 <label>Horas</label>
 <input id="horas" type="number">
@@ -50,7 +62,7 @@
 <label>Minutos</label>
 <input id="minutos" type="number">
 
-<button id="calcular">Calcular</button>
+<button id="calcular" type="button">Calcular</button>
 
 <div id="resultado"></div>
 
@@ -60,9 +72,9 @@
 
 <div id="cotizacion"></div>
 
-<button id="pdf">Descargar PDF</button>
+<button id="pdf" type="button">Descargar PDF</button>
 
-<button id="whatsapp">Enviar por WhatsApp</button>
+<button id="whatsapp" type="button">Enviar por WhatsApp</button>
 
 </div>
 
@@ -98,7 +110,7 @@
 
 </div>
 
-<script src="script.js"></script>
+<script src="./script.js" defer></script>
 
 </body>
 </html>

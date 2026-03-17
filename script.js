@@ -1,237 +1,315 @@
-const materiales={
+document.addEventListener("DOMContentLoaded", () => {
 
+const materiales = {
 "PLA ELEGOO":24900,
 "PETG ELEGOO":23000,
 "PLA 3NMAX":19000
-
 }
 
-let precioFinal=0
+let precioFinal = 0
 
-const materialSelect=document.getElementById("material")
+const materialSelect = document.getElementById("material")
+const contenedorProductos = document.getElementById("productos")
 
-for(let m in materiales){
-
-let option=document.createElement("option")
-option.value=m
-option.text=m
-
+// =====================
+// CARGAR MATERIALES
+// =====================
+for (let m in materiales) {
+let option = document.createElement("option")
+option.value = m
+option.text = m
 materialSelect.appendChild(option)
+}
+
+// =====================
+// AGREGAR PRODUCTOS
+// =====================
+let contadorProductos = 1
+
+function agregarProducto(){
+
+let div = document.createElement("div")
+div.className = "fila producto"
+
+div.innerHTML = `
+<input placeholder="Producto ${contadorProductos}" class="nombreProducto">
+<input type="number" placeholder="g" class="gramosProducto">
+<button type="button" class="eliminar">✕</button>
+`
+
+contadorProductos++
+
+div.querySelector(".eliminar").onclick = () => div.remove()
+
+contenedorProductos.appendChild(div)
+}
+
+document.getElementById("agregarProducto").addEventListener("click", agregarProducto)
+
+// primer producto
+agregarProducto()
+
+// =====================
+// CALCULO
+// =====================
+function obtenerGramosTotales(){
+
+let total = 0
+
+document.querySelectorAll(".gramosProducto").forEach(input=>{
+
+let valor = input.value.replace(",", ".").trim()
+
+let numero = parseFloat(valor)
+
+if(!isNaN(numero)){
+total += numero
+}
+
+})
+
+return total
 
 }
 
 function margenRecomendado(tiempo){
-
 if(tiempo<=2) return 40
 if(tiempo<=6) return 60
 return 80
-
 }
-
-document.getElementById("calcular").addEventListener("click",calcular)
 
 function calcular(){
 
-let gramos=parseFloat(document.getElementById("gramos").value)
+let gramos = obtenerGramosTotales()
 
-let horas=parseFloat(document.getElementById("horas").value)
+let horas = parseFloat(document.getElementById("horas").value) || 0
+let minutos = parseFloat(document.getElementById("minutos").value) || 0
 
-let minutos=parseFloat(document.getElementById("minutos").value)
+let tiempo = horas + (minutos/60)
 
-let tiempo=horas+(minutos/60)
+let precioKg = materiales[materialSelect.value]
 
-let precioKg=materiales[materialSelect.value]
+let costoMaterial = (precioKg/1000) * gramos
 
-let costoMaterial=(precioKg/1000)*gramos
+let precioKwh = parseFloat(document.getElementById("precioLuz").value) || 0
+let consumo = parseFloat(document.getElementById("consumo").value) || 0
 
-let precioKwh=document.getElementById("precioLuz").value
+let costoLuz = (consumo/1000) * tiempo * precioKwh
 
-let consumo=document.getElementById("consumo").value
+let repuestos = parseFloat(document.getElementById("repuestos").value) || 0
+let vida = parseFloat(document.getElementById("vida").value) || 1
 
-let costoLuz=(consumo/1000)*tiempo*precioKwh
+let desgasteHora = repuestos / vida
 
-let repuestos=document.getElementById("repuestos").value
+let costoDesgaste = desgasteHora * tiempo
 
-let vida=document.getElementById("vida").value
+let insumos = parseFloat(document.getElementById("insumos").value) || 0
 
-let desgasteHora=repuestos/vida
+let costoBase = costoMaterial + costoLuz + costoDesgaste + insumos
 
-let costoDesgaste=desgasteHora*tiempo
+let fallos = parseFloat(document.getElementById("fallos").value) || 0
 
-let insumos=parseFloat(document.getElementById("insumos").value)
+let costoFallos = costoBase * (fallos/100)
 
-let costoBase=costoMaterial+costoLuz+costoDesgaste+insumos
+let costoTotal = costoBase + costoFallos
 
-let fallos=document.getElementById("fallos").value
+let margen = margenRecomendado(tiempo)
 
-let costoFallos=costoBase*(fallos/100)
+precioFinal = costoTotal + (costoTotal * margen / 100)
 
-let costoTotal=costoBase+costoFallos
+let minimo = parseFloat(document.getElementById("minimo").value) || 0
 
-let margen=margenRecomendado(tiempo)
+precioFinal = Math.max(precioFinal, minimo)
 
-precioFinal=costoTotal+(costoTotal*margen/100)
-
-let minimo=document.getElementById("minimo").value
-
-precioFinal=Math.max(precioFinal,minimo)
-
-document.getElementById("resultado").innerHTML=
-
-`
-Material: $${costoMaterial.toFixed(2)}<br>
-Electricidad: $${costoLuz.toFixed(2)}<br>
-Desgaste: $${costoDesgaste.toFixed(2)}<br>
-Fallos: $${costoFallos.toFixed(2)}<br>
-<hr>
+document.getElementById("resultado").innerHTML = `
+Filamento total: ${gramos} g<br>
 Costo total: $${costoTotal.toFixed(2)}
 `
 
-document.getElementById("precioFinal").innerText="$"+precioFinal.toFixed(2)
-
-let precioMinimo=costoTotal*1.2
-let mayorista=costoTotal*2
-let recomendado=costoTotal*3
-let premium=costoTotal*4
-
-document.getElementById("cotizacion").innerHTML=
-
-`
-<label><input type="radio" name="precioPDF" value="${precioMinimo}"> Min rentable $${precioMinimo.toFixed(2)}</label><br>
-<label><input type="radio" name="precioPDF" value="${mayorista}"> Mayorista $${mayorista.toFixed(2)}</label><br>
-<label><input type="radio" name="precioPDF" value="${recomendado}" checked> Recomendado $${recomendado.toFixed(2)}</label><br>
-<label><input type="radio" name="precioPDF" value="${premium}"> Premium $${premium.toFixed(2)}</label>
-`
+document.getElementById("precioFinal").innerText = "$"+precioFinal.toFixed(2)
 
 }
 
-function obtenerPrecioSeleccionado(){
+document.getElementById("calcular").addEventListener("click", calcular)
 
-let radios=document.getElementsByName("precioPDF")
-
-for(let r of radios){
-
-if(r.checked){
-
-return parseFloat(r.value)
-
-}
-
-}
-
-return precioFinal
-
-}
-
-document.getElementById("pdf").addEventListener("click",generarPDF)
-
+// =====================
+// PDF
+// =====================
 function generarPDF(){
 
-const { jsPDF } = window.jspdf
-
-let doc=new jsPDF()
-
-let precioPDF=obtenerPrecioSeleccionado()
-
-let cliente=document.getElementById("cliente").value||"Cliente"
-
-let material=materialSelect.value
-
-let gramos=document.getElementById("gramos").value
-
-let horas=document.getElementById("horas").value
-
-let minutos=document.getElementById("minutos").value
-
-let numero=localStorage.getItem("numeroPresupuesto")
-
-if(!numero){
-
-numero=1
-
-}else{
-
-numero=parseInt(numero)+1
-
+if(precioFinal === 0){
+alert("Primero calculá el presupuesto")
+return
 }
 
+const { jsPDF } = window.jspdf
+let doc = new jsPDF()
+
+let cliente = document.getElementById("cliente").value || "Cliente"
+let fecha = new Date().toLocaleDateString()
+
+// NUMERO
+let numero = localStorage.getItem("numeroPresupuesto")
+numero = numero ? parseInt(numero)+1 : 1
 localStorage.setItem("numeroPresupuesto",numero)
 
-let numeroFormateado=String(numero).padStart(4,"0")
+let numeroFormateado = String(numero).padStart(4,"0")
+let numeroPresupuesto = "P-"+new Date().getFullYear()+"-"+numeroFormateado
 
-let numeroPresupuesto="P-"+new Date().getFullYear()+"-"+numeroFormateado
 
-let img=new Image()
+// ================= LOGO =================
+let logo = new Image()
+logo.src = "logo.png"
 
-img.src="logo.png"
+logo.onload = function(){
 
-img.onload=function(){
+// ================= HEADER =================
+doc.setFillColor("#a3ccd3")
+doc.rect(0,0,210,30,"F")
 
-doc.setGState(new doc.GState({opacity:0.08}))
-doc.addImage(img,"PNG",40,60,120,120)
-doc.setGState(new doc.GState({opacity:1}))
+// LOGO
+doc.addImage(logo,"PNG",160,5,30,20)
 
-doc.addImage(img,"PNG",15,10,40,20)
+// TEXTO EMPRESA
+doc.setTextColor("#f9d19b")
+doc.setFontSize(30)
+doc.text("Norte, Nudo, Next",20,18)
 
-doc.setFontSize(18)
-doc.text("PRESUPUESTO IMPRESIÓN 3D",105,20,null,null,"center")
+doc.setFontSize(15)
+doc.text("Impresión 3D Profesional",20,25)
+
+doc.setTextColor(0)
+
+
+// ================= MARCA DE AGUA =================
+
+// tamaño del PDF
+const pageWidth = doc.internal.pageSize.getWidth()
+const pageHeight = doc.internal.pageSize.getHeight()
+
+// tamaño del logo (ajustalo a gusto)
+const imgWidth = 100
+const imgHeight = 100
+
+const centerX = (pageWidth - imgWidth) / 2
+const centerY = (pageHeight - imgHeight) / 2
+
+doc.setGState(new doc.GState({ opacity: 0.09 }))
+doc.addImage(logo, "PNG", centerX, centerY, imgWidth, imgHeight)
+doc.setGState(new doc.GState({ opacity: 1 }))
+
+// ================= CAJA DATOS =================
+doc.setDrawColor(200)
+doc.rect(140,35,60,35)
+
+doc.setFontSize(10)
+doc.text("Presupuesto",145,42)
+doc.text(numeroPresupuesto,145,48)
+
+doc.text("Fecha",145,58)
+doc.text(fecha,145,64)
+
+
+// ================= CLIENTE =================
+doc.setFontSize(11)
+doc.text("Cliente:",20,45)
+doc.text(cliente,20,52)
+
+doc.line(10,70,200,70)
+
+
+// ================= TABLA =================
+doc.setFillColor(240)
+doc.rect(10,75,190,10,"F")
 
 doc.setFontSize(11)
+doc.text("Producto",15,82)
+doc.text("Gramos",120,82)
+doc.text("Precio",165,82)
 
-doc.text("Número: "+numeroPresupuesto,150,30)
-doc.text("Fecha: "+new Date().toLocaleDateString(),150,36)
+let y = 85
+doc.setDrawColor(220)
 
-doc.line(10,40,200,40)
+// 🔥 gramos totales reales
+let gramosTotales = obtenerGramosTotales()
 
-doc.text("Cliente: "+cliente,20,55)
+document.querySelectorAll(".producto").forEach((p)=>{
 
-doc.line(10,65,200,65)
+let nombre = p.querySelector(".nombreProducto").value || "Producto"
 
-doc.text("Material: "+material,20,80)
-doc.text("Filamento: "+gramos+" g",20,88)
-doc.text("Tiempo: "+horas+"h "+minutos+"m",20,96)
+// 👇 importante: misma lógica robusta que usás arriba
+let valor = p.querySelector(".gramosProducto").value.replace(",", ".").trim()
+let gramos = parseFloat(valor)
 
-doc.line(10,110,200,110)
+if(isNaN(gramos)) gramos = 0
 
-doc.setFontSize(16)
-doc.text("TOTAL",20,125)
+// 🔥 cálculo proporcional real
+let porcentaje = gramosTotales > 0 ? gramos / gramosTotales : 0
+let precioProducto = precioFinal * porcentaje
 
-doc.setFontSize(28)
-doc.text("$"+precioPDF.toFixed(2),20,140)
+y += 10
 
-doc.text("Tiempo de entrega estimado 3 a 5 días",20,170)
-doc.text("Gracias por confiar en nuestro servicio",20,178)
+doc.line(10,y,200,y)
 
-doc.text("WhatsApp: +54 3512715524",105,195,null,null,"center")
+doc.text(nombre,15,y-3)
+doc.text(gramos+" g",120,y-3)
+doc.text("$"+precioProducto.toFixed(0),165,y-3)
 
+})
+
+doc.line(10,y+2,200,y+2)
+
+
+// ================= TOTAL =================
+doc.setFillColor("#a3ccd3")
+doc.rect(120,y+15,80,20,"F")
+
+doc.setTextColor("#fc8332")
+doc.setFontSize(12)
+doc.text("TOTAL",125,y+25)
+
+doc.setFontSize(18)
+doc.text("$"+precioFinal.toFixed(0),150,y+25)
+
+doc.setTextColor(0)
+
+
+// ================= FOOTER =================
+doc.setDrawColor(200)
+doc.line(10,270,200,270)
+
+doc.setFontSize(12)
+doc.text("Gracias por confiar en nosotros",20,280)
+doc.text("Validez del presupuesto: 7 días",20,285)
+doc.text("Demora estimada: 3-5 días hábiles",20,275)
+doc.text("Contacto: 351-2715524",20,290)
+
+
+// ================= GUARDAR =================
 doc.save("presupuesto-"+numeroPresupuesto+".pdf")
 
 }
 
 }
+document.getElementById("pdf").addEventListener("click", generarPDF)
 
-document.getElementById("whatsapp").addEventListener("click",enviarWhatsApp)
-
+// =====================
+// WHATSAPP
+// =====================
 function enviarWhatsApp(){
 
-let cliente=document.getElementById("cliente").value||"Cliente"
+let mensaje="Presupuesto impresión 3D\n\n"
 
-let precio=obtenerPrecioSeleccionado()
+document.querySelectorAll(".producto").forEach((p,i)=>{
 
-let mensaje=
+let nombre=p.querySelector(".nombreProducto").value||"Producto"
+let gramos=p.querySelector(".gramosProducto").value||0
 
-`Presupuesto impresión 3D
+mensaje+=`${i+1} - ${nombre} (${gramos} g)\n`
 
-Cliente: ${cliente}
+})
 
-Precio: $${precio.toFixed(2)}
-
-Tiempo de entrega estimado 3 a 5 días
-
-Gracias por confiar en nuestro servicio
-
-Presupuesto valido por 7 días
-`
+mensaje+=`\nTotal: $${precioFinal.toFixed(2)}`
 
 let url="https://wa.me/?text="+encodeURIComponent(mensaje)
 
@@ -239,8 +317,6 @@ window.open(url,"_blank")
 
 }
 
-if("serviceWorker" in navigator){
+document.getElementById("whatsapp").addEventListener("click", enviarWhatsApp)
 
-navigator.serviceWorker.register("service-worker.js")
-
-}
+})
