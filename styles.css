@@ -96,6 +96,29 @@ color:#22c55e;
 .grid{
 display:flex;
 flex-direction:column;
+gap:15px;
+}
+
+/* inputs más grandes para dedo */
+input, select{
+height:45px;
+font-size:16px;
+}
+
+/* botones más cómodos */
+button{
+height:45px;
+font-size:16px;
+}
+
+/* productos más cómodos */
+.fila.producto{
+grid-template-columns: 1fr;
+gap:10px;
+}
+
+.producto button{
+width:100%;
 }
 
 }
