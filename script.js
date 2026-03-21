@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let precioConMargenGlobal = 0;
     let montoDescuentoGlobal = 0;
     let descuentoGlobal = 0;
+    let minimoAplicado = false;
+    let minimoGlobal = 0;
 
     const materialSelect = document.getElementById("material");
     const contenedorProductos = document.getElementById("productos");
@@ -34,10 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
         div.className = "fila producto";
 
         div.innerHTML = `
-      <input placeholder="Producto ${contadorProductos}" class="nombreProducto">
-      <input type="number" placeholder="g" class="gramosProducto">
-      <button type="button" class="eliminar">✕</button>
-    `;
+            <input placeholder="Producto ${contadorProductos}" class="nombreProducto">
+            <input type="number" placeholder="g" class="gramosProducto">
+            <button type="button" class="eliminar">✕</button>
+        `;
 
         contadorProductos++;
 
@@ -107,15 +109,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         precioFinal = precioConMargenGlobal - montoDescuentoGlobal;
 
-        const minimo = parseFloat(document.getElementById("minimo").value) || 0;
-        precioFinal = Math.max(precioFinal, minimo);
+        minimoGlobal = parseFloat(document.getElementById("minimo").value) || 0;
+
+        if (precioFinal < minimoGlobal) {
+            precioFinal = minimoGlobal;
+            minimoAplicado = true;
+        } else {
+            minimoAplicado = false;
+        }
 
         document.getElementById("resultado").innerHTML = `
-      Filamento total: ${gramos} g<br>
-      Costo total: $${costoTotal.toFixed(2)}<br>
-      Precio con margen: $${precioConMargenGlobal.toFixed(2)}<br>
-      Descuento (${descuentoGlobal}%): -$${montoDescuentoGlobal.toFixed(2)}
-    `;
+            Filamento total: ${gramos} g<br>
+            Costo total: $${costoTotal.toFixed(2)}<br>
+            Precio con margen: $${precioConMargenGlobal.toFixed(2)}<br>
+            Descuento (${descuentoGlobal}%): -$${montoDescuentoGlobal.toFixed(2)}<br>
+            ${minimoAplicado ? `Precio mínimo aplicado: $${minimoGlobal.toFixed(2)}` : ""}
+        `;
 
         document.getElementById("precioFinal").innerText = "$" + precioFinal.toFixed(2);
     }
@@ -235,26 +244,36 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFontSize(11);
             doc.setFont("helvetica", "bold");
 
-            doc.text("Subtotal:", 120, y + 20);
-            doc.text("$" + precioConMargenGlobal.toFixed(0), 190, y + 20, { align: "right" });
+            let bloqueTotalY = y + 35;
 
-            let offsetY = 28;
+            if (!minimoAplicado) {
+                doc.text("Subtotal:", 120, y + 20);
+                doc.text("$" + precioConMargenGlobal.toFixed(0), 190, y + 20, { align: "right" });
 
-            if (descuentoGlobal > 0) {
-                doc.text("Descuento (" + descuentoGlobal + "%):", 120, y + offsetY);
-                doc.text("-$" + montoDescuentoGlobal.toFixed(0), 190, y + offsetY, { align: "right" });
-                offsetY += 8;
+                let offsetY = 28;
+
+                if (descuentoGlobal > 0) {
+                    doc.text("Descuento (" + descuentoGlobal + "%):", 120, y + offsetY);
+                    doc.text("-$" + montoDescuentoGlobal.toFixed(0), 190, y + offsetY, { align: "right" });
+                    offsetY += 8;
+                }
+
+                bloqueTotalY = y + 35;
+            } else {
+                doc.text("Precio mínimo aplicado:", 120, y + 20);
+                doc.text("$" + minimoGlobal.toFixed(0), 190, y + 20, { align: "right" });
+                bloqueTotalY = y + 28;
             }
 
             doc.setFillColor(163, 204, 211);
-            doc.rect(120, y + 35, 80, 22, "F");
+            doc.rect(120, bloqueTotalY, 80, 22, "F");
 
             doc.setTextColor(252, 131, 50);
             doc.setFontSize(11);
-            doc.text("TOTAL FINAL", 125, y + 43);
+            doc.text("TOTAL FINAL", 125, bloqueTotalY + 8);
 
             doc.setFontSize(18);
-            doc.text("$" + precioFinal.toFixed(0), 195, y + 50, { align: "right" });
+            doc.text("$" + precioFinal.toFixed(0), 195, bloqueTotalY + 15, { align: "right" });
 
             doc.setTextColor(120);
 
@@ -270,13 +289,13 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.text("Contacto: 351-2715524", 200, 276, { align: "right" });
 
             // QR
-            const mensajeQR = `Hola! Vi el presupuesto ${numeroPresupuesto} y quiero consultar`;
+            const mensajeQR = `Hola! Nina, vi el presupuesto ${numeroPresupuesto} y quiero avanzar con el pedido.`;
             const urlWhatsApp =
                 "https://api.whatsapp.com/send?phone=5493512715524&text=" +
                 encodeURIComponent(mensajeQR);
 
             const qrURL =
-                "https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=" +
+                "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" +
                 encodeURIComponent(urlWhatsApp);
 
             const qrImg = new Image();
