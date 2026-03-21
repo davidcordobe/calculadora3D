@@ -207,7 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // DATOS
+            doc.setFont("helvetica", "bold");
             doc.text("Cliente: " + cliente, 20, 45);
+            doc.setFont("helvetica", "normal");
             doc.text("Fecha: " + fecha, 20, 52);
             doc.text("N°: " + numeroPresupuesto, 20, 59);
 
