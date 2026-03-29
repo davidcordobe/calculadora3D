@@ -1,11 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     const materiales = {
         "PLA ELEGOO": 24900,
         "PETG ELEGOO": 23000,
-        "PLA 3NMAX": 19000
+        "PLA 3NMAX": 19000,
+        "PLA GRILON3": 24000
     };
 
-    // ================= VARIABLES GLOBALES =================
     let precioFinal = 0;
     let precioConMargenGlobal = 0;
     let montoDescuentoGlobal = 0;
@@ -15,10 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const materialSelect = document.getElementById("material");
     const contenedorProductos = document.getElementById("productos");
-    const botonAgregarProducto = document.getElementById("agregarProducto");
-    const botonCalcular = document.getElementById("calcular");
-    const botonPDF = document.getElementById("pdf");
-    const botonWhatsApp = document.getElementById("whatsapp");
 
     // ================= MATERIALES =================
     for (const m in materiales) {
@@ -33,52 +30,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function agregarProducto() {
         const div = document.createElement("div");
-        div.className = "fila producto";
+        div.className = "producto-card";
 
         div.innerHTML = `
-            <input placeholder="Producto ${contadorProductos}" class="nombreProducto">
-            <input type="number" placeholder="g" class="gramosProducto">
-            <button type="button" class="eliminar">✕</button>
+            <div class="fila-superior">
+                <input placeholder="Producto ${contadorProductos}" class="nombreProducto">
+                <input type="number" placeholder="g" class="gramosProducto">
+                <button type="button" class="eliminar">✕</button>
+            </div>
+
+            <div class="fila-tiempo">
+                <input type="number" placeholder="Horas" class="horasProducto">
+                <input type="number" placeholder="Min" class="minutosProducto">
+            </div>
         `;
 
         contadorProductos++;
 
-        const botonEliminar = div.querySelector(".eliminar");
-        botonEliminar.addEventListener("click", () => div.remove());
+        div.querySelector(".eliminar").addEventListener("click", () => {
+            div.remove();
+            calcular();
+        });
 
         contenedorProductos.appendChild(div);
     }
 
-    botonAgregarProducto.addEventListener("click", agregarProducto);
+    document.getElementById("agregarProducto").addEventListener("click", agregarProducto);
     agregarProducto();
 
-    // ================= GRAMOS =================
+    // ================= FUNCIONES =================
     function obtenerGramosTotales() {
         let total = 0;
 
         document.querySelectorAll(".gramosProducto").forEach((input) => {
-            const valor = (input.value || "").replace(",", ".").trim();
-            const numero = parseFloat(valor);
-            if (!isNaN(numero)) total += numero;
+            const val = parseFloat(input.value);
+            if (!isNaN(val)) total += val;
         });
 
         return total;
     }
 
-    // ================= MARGEN =================
+    function obtenerTiempoTotal() {
+        let total = 0;
+
+        // ✅ FIX CLAVE
+        document.querySelectorAll(".producto-card").forEach((p) => {
+            const h = parseFloat(p.querySelector(".horasProducto")?.value) || 0;
+            const m = parseFloat(p.querySelector(".minutosProducto")?.value) || 0;
+            total += h + (m / 60);
+        });
+
+        return total;
+    }
+
     function margenRecomendado(tiempo) {
-        if (tiempo <= 2) return 40;
-        if (tiempo <= 6) return 60;
-        return 80;
+        if (tiempo <= 2) return 30;
+        if (tiempo <= 6) return 50;
+        return 60;
     }
 
     // ================= CALCULAR =================
     function calcular() {
-        const gramos = obtenerGramosTotales();
 
-        const horas = parseFloat(document.getElementById("horas").value) || 0;
-        const minutos = parseFloat(document.getElementById("minutos").value) || 0;
-        const tiempo = horas + minutos / 60;
+        const gramos = obtenerGramosTotales();
+        const tiempo = obtenerTiempoTotal();
+
+        if (gramos <= 0 || tiempo <= 0) {
+            document.getElementById("precioFinal").innerText = "$0";
+            return;
+        }
 
         const precioKg = materiales[materialSelect.value] || 0;
         const costoMaterial = (precioKg / 1000) * gramos;
@@ -89,276 +109,294 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const repuestos = parseFloat(document.getElementById("repuestos").value) || 0;
         const vida = parseFloat(document.getElementById("vida").value) || 1;
-        const desgasteHora = repuestos / vida;
-        const costoDesgaste = desgasteHora * tiempo;
+        const costoDesgaste = (repuestos / vida) * tiempo;
 
         const insumos = parseFloat(document.getElementById("insumos").value) || 0;
 
-        const costoBase = costoMaterial + costoLuz + costoDesgaste + insumos;
+        const costoHora = 2000;
+        const costoTrabajo = tiempo * costoHora;
+
+        const costoBase = costoMaterial + costoLuz + costoDesgaste + insumos + costoTrabajo;
 
         const fallos = parseFloat(document.getElementById("fallos").value) || 0;
         const costoFallos = costoBase * (fallos / 100);
 
         const costoTotal = costoBase + costoFallos;
-        const margen = margenRecomendado(tiempo);
 
-        precioConMargenGlobal = costoTotal + (costoTotal * margen) / 100;
+        const margen = margenRecomendado(tiempo);
+        precioConMargenGlobal = costoTotal * (1 + margen / 100);
 
         descuentoGlobal = parseFloat(document.getElementById("descuento").value) || 0;
         montoDescuentoGlobal = precioConMargenGlobal * (descuentoGlobal / 100);
 
-        precioFinal = precioConMargenGlobal - montoDescuentoGlobal;
+        let precio = precioConMargenGlobal - montoDescuentoGlobal;
 
         minimoGlobal = parseFloat(document.getElementById("minimo").value) || 0;
 
-        if (precioFinal < minimoGlobal) {
-            precioFinal = minimoGlobal;
+        if (precio < minimoGlobal) {
+            precio = minimoGlobal;
             minimoAplicado = true;
         } else {
             minimoAplicado = false;
         }
 
+        // ✅ FIX REDONDEO
+        precio = Math.ceil(precio / 100) * 100;
+
+        precioFinal = precio;
+
         document.getElementById("resultado").innerHTML = `
-            Filamento total: ${gramos} g<br>
-            Costo total: $${costoTotal.toFixed(2)}<br>
-            Precio con margen: $${precioConMargenGlobal.toFixed(2)}<br>
-            Descuento (${descuentoGlobal}%): -$${montoDescuentoGlobal.toFixed(2)}<br>
-            ${minimoAplicado ? `Precio mínimo aplicado: $${minimoGlobal.toFixed(2)}` : ""}
+            Filamento: $${costoMaterial.toFixed(0)}<br>
+            Luz: $${costoLuz.toFixed(0)}<br>
+            Desgaste: $${costoDesgaste.toFixed(0)}<br>
+            Trabajo: $${costoTrabajo.toFixed(0)}<br>
+            Fallos: $${costoFallos.toFixed(0)}<br>
+            <hr>
+            Tiempo total: ${tiempo.toFixed(2)} hs<br>
+            Costo total: $${costoTotal.toFixed(0)}
         `;
 
-        document.getElementById("precioFinal").innerText = "$" + precioFinal.toFixed(2);
+        document.getElementById("precioFinal").innerText = "$" + precioFinal;
     }
 
-    botonCalcular.addEventListener("click", calcular);
+    document.addEventListener("input", calcular);
 
-    // ================= PDF =================
-    function generarPDF(e) {
-        if (e) e.preventDefault();
+// ================= PDF =================
+function generarPDF(e) {
+    if (e) e.preventDefault();
 
-        if (precioFinal === 0) {
-            alert("Primero calculá el presupuesto");
-            return;
-        }
-
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            alert("jsPDF no está cargado correctamente.");
-            return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        const cliente = document.getElementById("cliente").value || "Cliente";
-        const fecha = new Date().toLocaleDateString();
-
-        let numero = localStorage.getItem("numeroPresupuesto");
-        numero = numero ? parseInt(numero, 10) + 1 : 1;
-        localStorage.setItem("numeroPresupuesto", numero);
-
-        const numeroPresupuesto =
-            "P-" + new Date().getFullYear() + "-" + String(numero).padStart(4, "0");
-
-        function guardarPDF() {
-            doc.save("presupuesto-" + numeroPresupuesto + ".pdf");
-        }
-
-        function dibujarContenido(logoCargado, logoImg) {
-            // HEADER
-            doc.setFillColor(163, 204, 211);
-            doc.rect(0, 0, 210, 30, "F");
-
-            if (logoCargado && logoImg) {
-                try {
-                    doc.addImage(logoImg, "PNG", 160, 5, 30, 20);
-                } catch (err) {
-                    console.log("No se pudo insertar el logo:", err);
-                }
-            }
-
-            doc.setTextColor(252, 131, 50);
-            doc.setFontSize(16);
-            doc.text("Norte, Nudo, Next", 20, 18);
-
-            doc.setFontSize(10);
-            doc.text("Impresión 3D Profesional", 20, 25);
-
-            doc.setTextColor(0);
-
-            // MARCA DE AGUA
-            if (logoCargado && logoImg) {
-                try {
-                    const pageWidth = doc.internal.pageSize.getWidth();
-                    const pageHeight = doc.internal.pageSize.getHeight();
-
-                    const imgWidth = 100;
-                    const imgHeight = 100;
-
-                    const centerX = (pageWidth - imgWidth) / 2;
-                    const centerY = (pageHeight - imgHeight) / 2;
-
-                    if (doc.GState && doc.setGState) {
-                        doc.setGState(new doc.GState({ opacity: 0.08 }));
-                        doc.addImage(logoImg, "PNG", centerX, centerY, imgWidth, imgHeight);
-                        doc.setGState(new doc.GState({ opacity: 1 }));
-                    }
-                } catch (err) {
-                    console.log("No se pudo aplicar la marca de agua:", err);
-                }
-            }
-
-            // DATOS
-            doc.setFont("helvetica", "bold");
-            doc.text("Cliente: " + cliente, 20, 45);
-            doc.setFont("helvetica", "normal");
-            doc.text("Fecha: " + fecha, 20, 52);
-            doc.text("N°: " + numeroPresupuesto, 20, 59);
-
-            doc.line(10, 70, 200, 70);
-
-            // TABLA
-            doc.text("Producto", 15, 80);
-            doc.text("Gramos", 120, 80);
-            doc.text("Precio", 165, 80);
-
-            let y = 85;
-            const gramosTotales = obtenerGramosTotales();
-
-            document.querySelectorAll(".producto").forEach((p) => {
-                const nombre = p.querySelector(".nombreProducto")?.value || "Producto";
-
-                let valor = p.querySelector(".gramosProducto")?.value || "0";
-                valor = valor.replace(",", ".").trim();
-
-                let gramos = parseFloat(valor);
-                if (isNaN(gramos)) gramos = 0;
-
-                const porcentaje = gramosTotales > 0 ? gramos / gramosTotales : 0;
-                const precioProducto = precioFinal * porcentaje;
-
-                y += 10;
-
-                doc.text(String(nombre), 15, y);
-                doc.text(gramos + " g", 120, y);
-                doc.text("$" + precioProducto.toFixed(0), 165, y);
-            });
-
-            // TOTALES
-            doc.setFontSize(11);
-            doc.setFont("helvetica", "bold");
-
-            let bloqueTotalY = y + 35;
-
-            if (!minimoAplicado) {
-                doc.text("Subtotal:", 120, y + 20);
-                doc.text("$" + precioConMargenGlobal.toFixed(0), 190, y + 20, { align: "right" });
-
-                let offsetY = 28;
-
-                if (descuentoGlobal > 0) {
-                    doc.text("Descuento (" + descuentoGlobal + "%):", 120, y + offsetY);
-                    doc.text("-$" + montoDescuentoGlobal.toFixed(0), 190, y + offsetY, { align: "right" });
-                    offsetY += 8;
-                }
-
-                bloqueTotalY = y + 35;
-            } else {
-                doc.text("Precio mínimo aplicado:", 120, y + 20);
-                doc.text("$" + minimoGlobal.toFixed(0), 190, y + 20, { align: "right" });
-                bloqueTotalY = y + 28;
-            }
-
-            doc.setFillColor(163, 204, 211);
-            doc.rect(120, bloqueTotalY, 80, 22, "F");
-
-            doc.setTextColor(252, 131, 50);
-            doc.setFontSize(11);
-            doc.text("TOTAL FINAL", 125, bloqueTotalY + 8);
-
-            doc.setFontSize(18);
-            doc.text("$" + precioFinal.toFixed(0), 195, bloqueTotalY + 15, { align: "right" });
-
-            doc.setTextColor(120);
-
-            // FOOTER
-            doc.setDrawColor(200);
-            doc.line(10, 270, 200, 270);
-
-            doc.setFontSize(11);
-            doc.setFont("helvetica", "bold");
-            doc.text("Gracias por confiar en nuestro servicio", 20, 276);
-            doc.text("Validez del presupuesto: 7 días", 20, 282);
-            doc.text("Tiempo estimado de entrega: 3 a 5 días", 20, 288);
-            doc.text("Contacto: 351-2715524", 200, 276, { align: "right" });
-
-            // QR
-            const mensajeQR = `Hola! Nina, vi el presupuesto ${numeroPresupuesto} y quiero avanzar con el pedido.`;
-            const urlWhatsApp =
-                "https://api.whatsapp.com/send?phone=5493512715524&text=" +
-                encodeURIComponent(mensajeQR);
-
-            const qrURL =
-                "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" +
-                encodeURIComponent(urlWhatsApp);
-
-            const qrImg = new Image();
-            qrImg.crossOrigin = "Anonymous";
-
-            qrImg.onload = function () {
-                try {
-                    doc.addImage(qrImg, "PNG", 160, 230, 35, 35);
-                    doc.setFontSize(8);
-                    doc.setTextColor("#fc8332");
-                    doc.text("Escaneá para contactarnos", 160, 226);
-                } catch (err) {
-                    console.log("No se pudo insertar el QR:", err);
-                }
-                guardarPDF();
-            };
-
-            qrImg.onerror = function () {
-                console.log("El QR no cargó. Se guarda el PDF igual.");
-                guardarPDF();
-            };
-
-            qrImg.src = qrURL;
-        }
-
-        const logo = new Image();
-
-        logo.onload = function () {
-            dibujarContenido(true, logo);
-        };
-
-        logo.onerror = function () {
-            console.log("No se encontró logo.png. Se genera el PDF sin logo.");
-            dibujarContenido(false, null);
-        };
-
-        logo.src = "logo.png";
+    if (precioFinal === 0) {
+        alert("Primero calculá el presupuesto");
+        return;
     }
 
-    botonPDF.addEventListener("click", generarPDF);
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert("jsPDF no está cargado correctamente.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const cliente = document.getElementById("cliente").value || "Cliente";
+    const fecha = new Date().toLocaleDateString();
+
+    let numero = localStorage.getItem("numeroPresupuesto");
+    numero = numero ? parseInt(numero, 10) + 1 : 1;
+    localStorage.setItem("numeroPresupuesto", numero);
+
+    const numeroPresupuesto =
+        "P-" + new Date().getFullYear() + "-" + String(numero).padStart(4, "0");
+
+    function guardarPDF() {
+        doc.save("presupuesto-" + numeroPresupuesto + ".pdf");
+    }
+
+    function dibujarContenido(logoCargado, logoImg) {
+
+        // ================= HEADER PROFESIONAL =================
+        doc.setFillColor("#f9d19b");
+        doc.rect(0, 0, 210, 35, "F");
+
+        if (logoCargado && logoImg) {
+            try {
+                doc.addImage(logoImg, "PNG", 155, 5, 40, 25);
+            } catch {}
+        }
+
+        doc.setTextColor("#fc8332");
+        doc.setFontSize(18);
+        doc.text("Norte, Nudo, Next", 20, 20);
+
+        doc.setFontSize(10);
+        doc.text("Impresión 3D Profesional", 20, 28);
+
+        // ================= MARCA DE AGUA =================
+        if (logoCargado && logoImg && doc.GState) {
+            try {
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+
+                doc.setGState(new doc.GState({ opacity: 0.08 }));
+                doc.addImage(logoImg, "PNG", 40, 80, 130, 130);
+                doc.setGState(new doc.GState({ opacity: 1 }));
+            } catch {}
+        }
+
+        doc.setTextColor(0);
+
+        // ================= BLOQUE DATOS =================
+        doc.setFillColor(241, 245, 249);
+        doc.rect(10, 45, 190, 25, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Cliente:", 15, 55);
+        doc.text("Fecha:", 15, 63);
+        doc.text("N°:", 120, 55);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(cliente, 40, 55);
+        doc.text(fecha, 40, 63);
+        doc.text(numeroPresupuesto, 135, 55);
+
+        doc.line(10, 75, 200, 75);
+
+// ================= TABLA =================
+doc.setFont("helvetica", "bold");
+doc.setFontSize(11);
+
+doc.text("Producto", 15, 85);
+doc.text("Gramos", 110, 85);
+doc.text("Precio", 195, 85, { align: "right" });
+
+let y = 90;
+
+const gramosTotales = obtenerGramosTotales();
+const tiempoTotal = obtenerTiempoTotal();
+
+document.querySelectorAll(".producto-card").forEach((p) => {
+
+    const nombre = p.querySelector(".nombreProducto")?.value || "Producto";
+    const gramos = parseFloat(p.querySelector(".gramosProducto")?.value) || 0;
+
+    const h = parseFloat(p.querySelector(".horasProducto")?.value) || 0;
+    const m = parseFloat(p.querySelector(".minutosProducto")?.value) || 0;
+    const tiempoProducto = h + (m / 60);
+
+    // 🔥 cálculo sigue usando tiempo (pero no lo mostramos)
+    const pesoTiempo = tiempoTotal > 0 ? tiempoProducto / tiempoTotal : 0;
+    const pesoGramos = gramosTotales > 0 ? gramos / gramosTotales : 0;
+
+    const ponderacion = (pesoTiempo * 0.6) + (pesoGramos * 0.4);
+    const precioProducto = precioFinal * ponderacion;
+
+    if (y > 250) {
+        doc.addPage();
+        y = 20;
+    }
+
+    y += 10;
+
+    doc.setFont("helvetica", "normal");
+
+    doc.text(nombre, 15, y);
+    doc.text(`${gramos} g`, 110, y);
+    doc.text(`$${precioProducto.toFixed(0)}`, 195, y, { align: "right" });
+});
+
+        // ================= TOTAL TIPO FACTURA =================
+        y += 20;
+
+        doc.setFillColor("#a3ccd3");
+        doc.rect(110, y, 90, 25, "F");
+
+        doc.setTextColor("#fc8332");
+        doc.setFontSize(11);
+        doc.text("TOTAL FINAL", 115, y + 10);
+
+        doc.setFontSize(20);
+        doc.text(`$${precioFinal.toFixed(0)}`, 195, y + 18, { align: "right" });
+
+        doc.setTextColor(120);
+
+        // ================= FOOTER =================
+        doc.setDrawColor(200);
+        doc.line(10, 270, 200, 270);
+
+        doc.setFontSize(10);
+        doc.text("Validez del presupuesto: 7 días", 20, 276);
+        doc.text("Tiempo estimado: 3 a 5 días", 20, 282);
+
+        doc.text("Contacto: 351-2715524", 200, 276, { align: "right" });
+
+        // ================= QR =================
+        const mensajeQR = `Hola! Vi el presupuesto ${numeroPresupuesto} y quiero avanzar.`;
+
+        const urlWhatsApp =
+            "https://api.whatsapp.com/send?phone=5493512715524&text=" +
+            encodeURIComponent(mensajeQR);
+
+        const qrURL =
+            "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" +
+            encodeURIComponent(urlWhatsApp);
+
+        const qrImg = new Image();
+        qrImg.crossOrigin = "Anonymous";
+
+        qrImg.onload = function () {
+            try {
+                doc.addImage(qrImg, "PNG", 160, 225, 35, 35);
+                doc.setFontSize(8);
+                doc.text("Escaneá para contactarnos", 160, 222);
+            } catch {}
+            guardarPDF();
+        };
+
+        qrImg.onerror = function () {
+            guardarPDF();
+        };
+
+        qrImg.src = qrURL;
+    }
+
+    const logo = new Image();
+
+    logo.onload = () => dibujarContenido(true, logo);
+    logo.onerror = () => dibujarContenido(false, null);
+
+    logo.src = "logo.png";
+}
+
+document.getElementById("pdf").addEventListener("click", generarPDF);
+
+// ================= WHATSAPP =================
+document.getElementById("whatsapp").addEventListener("click", () => {
+
+    if (precioFinal === 0) {
+        alert("Primero completá los datos");
+        return;
+    }
+
+    let mensaje = `📦 Presupuesto impresión 3D\n\n`;
+
+    document.querySelectorAll(".producto-card").forEach((p) => {
+        const nombre = p.querySelector(".nombreProducto")?.value || "Producto";
+        const gramos = p.querySelector(".gramosProducto")?.value || 0;
+        const h = p.querySelector(".horasProducto")?.value || 0;
+        const m = p.querySelector(".minutosProducto")?.value || 0;
+
+        mensaje += `• ${nombre} - ${gramos}g (${h}h ${m}m)\n`;
+    });
+
+    mensaje += `\n💰 Total: $${precioFinal}`;
+
+    const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+    window.open(url, "_blank");
+});
 
     // ================= WHATSAPP =================
-    function enviarWhatsApp() {
+    document.getElementById("whatsapp").addEventListener("click", () => {
+
         if (precioFinal === 0) {
-            alert("Primero calculá el presupuesto");
+            alert("Primero completá los datos");
             return;
         }
 
-        let mensaje = "Presupuesto impresión 3D\n\n";
+        let mensaje = `📦 Presupuesto impresión 3D\n\n`;
 
-        document.querySelectorAll(".producto").forEach((p, i) => {
+        document.querySelectorAll(".producto-card").forEach((p) => {
             const nombre = p.querySelector(".nombreProducto")?.value || "Producto";
             const gramos = p.querySelector(".gramosProducto")?.value || 0;
-            mensaje += `${i + 1} - ${nombre} (${gramos} g)\n`;
+            const h = p.querySelector(".horasProducto")?.value || 0;
+            const m = p.querySelector(".minutosProducto")?.value || 0;
+
+            mensaje += `• ${nombre} - ${gramos}g (${h}h ${m}m)\n`;
         });
 
-        mensaje += `\nTotal: $${precioFinal.toFixed(2)}`;
+        mensaje += `\n💰 Total: $${precioFinal}`;
 
         const url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
         window.open(url, "_blank");
-    }
+    });
 
-    botonWhatsApp.addEventListener("click", enviarWhatsApp);
 });
