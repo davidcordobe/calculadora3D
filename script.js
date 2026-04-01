@@ -77,9 +77,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function margenRecomendado(tiempo) {
-        if (tiempo <= 2) return 30;
-        if (tiempo <= 6) return 50;
-        return 60;
+        if (tiempo <= 2) return 20;
+        if (tiempo <= 6) return 30;
+        return 40;
     }
 
     function calcular() {
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const insumos = parseFloat(document.getElementById("insumos").value) || 0;
 
-        const costoHora = 1200;
+        const costoHora = 500;
         const costoTrabajo = tiempo * costoHora;
 
         const costoBase = costoMaterial + costoLuz + costoDesgaste + insumos + costoTrabajo;
