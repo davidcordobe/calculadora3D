@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const insumos = parseFloat(document.getElementById("insumos").value) || 0;
 
-        const costoHora = 500;
+        const costoHora = 300;
         const costoTrabajo = tiempo * costoHora;
 
         const costoBase = costoMaterial + costoLuz + costoDesgaste + insumos + costoTrabajo;
