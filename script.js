@@ -10,8 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const materiales = {
         "PLA ELEGOO": 24900,
         "PETG ELEGOO": 23000,
-        "PLA 3NMAX": 19000,
-        "PLA GRILON3": 24000,
+        "PLA 3NMAX": 20000,
+        "PLA GRILON3": 24900,
     };
 
 
@@ -212,7 +212,7 @@ function generarPDF(e) {
     function dibujarContenido(logoCargado, logoImg) {
 
         // ================= HEADER =================
-        doc.setFillColor("#f9d19b");
+        doc.setFillColor("#a3ccd3");
         doc.rect(0, 0, 210, 35, "F");
 
         if (logoCargado && logoImg) {
