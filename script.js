@@ -175,7 +175,9 @@ function generarPDF(e) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const cliente = document.getElementById("cliente").value || "Cliente";
+const cliente = (document.getElementById("cliente").value || "Cliente")
+    .trim()
+    .toUpperCase();
     const fecha = new Date().toLocaleDateString();
 
     let numero = localStorage.getItem("numeroPresupuesto");
@@ -248,7 +250,7 @@ function generarPDF(e) {
         doc.text("Fecha:", 15, 63);
         doc.text("N°:", 120, 55);
 
-        doc.setFont("helvetica", "normal");
+        doc.setFont("helvetica", "bold");
         doc.text(cliente, 40, 55);
         doc.text(fecha, 40, 63);
         doc.text(numeroPresupuesto, 135, 55);
