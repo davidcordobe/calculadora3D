@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const costoTotal = costoBase + costoFallos;
 
         const margen = margenRecomendado(tiempo);
-        precioConMargenGlobal = costoTotal * (1 + margen / 100);
+        precioConMargenGlobal = costoTotal * (2.5 + margen / 100);
 
         descuentoGlobal = parseFloat(document.getElementById("descuento").value) || 0;
         montoDescuentoGlobal = precioConMargenGlobal * (descuentoGlobal / 100);
