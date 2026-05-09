@@ -2,8 +2,6 @@ let precioFinal = 0;
 let precioConMargenGlobal = 0;
 let montoDescuentoGlobal = 0;
 let descuentoGlobal = 0;
-let minimoAplicado = false;
-let minimoGlobal = 0;
 let precioSinRedondeoGlobal = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "PLA 3NMAX": 20000,
         "PLA GRILON3": 24900,
     };
-
 
     const materialSelect = document.getElementById("material");
     const contenedorProductos = document.getElementById("productos");
@@ -54,7 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
         contenedorProductos.appendChild(div);
     }
 
-    document.getElementById("agregarProducto").addEventListener("click", agregarProducto);
+    document
+        .getElementById("agregarProducto")
+        .addEventListener("click", agregarProducto);
     agregarProducto();
 
     function obtenerGramosTotales() {
@@ -76,12 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return total;
     }
 
-    function margenRecomendado(tiempo) {
-        if (tiempo <= 2) return 20;
-        if (tiempo <= 6) return 30;
-        return 40;
-    }
-
     function calcular() {
         const gramos = obtenerGramosTotales();
         const tiempo = obtenerTiempoTotal();
@@ -91,72 +84,127 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // ================= COSTOS =================
         const precioKg = materiales[materialSelect.value] || 0;
         const costoMaterial = (precioKg / 1000) * gramos;
 
-        const precioKwh = parseFloat(document.getElementById("precioLuz").value) || 0;
+        const precioKwh =
+            parseFloat(document.getElementById("precioLuz").value) || 0;
         const consumo = parseFloat(document.getElementById("consumo").value) || 0;
         const costoLuz = (consumo / 1000) * tiempo * precioKwh;
 
-        const repuestos = parseFloat(document.getElementById("repuestos").value) || 0;
+        const repuestos =
+            parseFloat(document.getElementById("repuestos").value) || 0;
         const vida = parseFloat(document.getElementById("vida").value) || 1;
         const costoDesgaste = (repuestos / vida) * tiempo;
 
         const insumos = parseFloat(document.getElementById("insumos").value) || 0;
 
-        const costoHora = 300;
+        const costoHora = 50; // podés ajustar (80 más equilibrado)
         const costoTrabajo = tiempo * costoHora;
 
-        const costoBase = costoMaterial + costoLuz + costoDesgaste + insumos + costoTrabajo;
+        const costoBase =
+            costoMaterial + costoLuz + costoDesgaste + insumos + costoTrabajo;
 
         const fallos = parseFloat(document.getElementById("fallos").value) || 0;
         const costoFallos = costoBase * (fallos / 100);
 
         const costoTotal = costoBase + costoFallos;
 
-        const margen = margenRecomendado(tiempo);
-        precioConMargenGlobal = costoTotal * (2.5 + margen / 100);
+        // ================= GANANCIA =================
+        let multiplicador =
+            parseFloat(document.getElementById("multiplicador").value) || 2;
+        if (multiplicador < 2) multiplicador = 2;
 
-        descuentoGlobal = parseFloat(document.getElementById("descuento").value) || 0;
+        precioConMargenGlobal = costoTotal * multiplicador;
+
+        descuentoGlobal =
+            parseFloat(document.getElementById("descuento").value) || 0;
         montoDescuentoGlobal = precioConMargenGlobal * (descuentoGlobal / 100);
 
         let precio = precioConMargenGlobal - montoDescuentoGlobal;
 
-        // ✅ 🔥 ESTE ES EL FIX CLAVE
-        precioSinRedondeoGlobal = precio;
+        // ================= CALCULO REAL =================
+        const ganancia = precio - costoTotal;
+        const margenPorcentaje = (ganancia / costoTotal) * 100;
 
-        minimoGlobal = parseFloat(document.getElementById("minimo").value) || 0;
+        // ================= ANALISIS PRO =================
+        let colorMargen = "";
+        let mensajeMargen = "";
+        let precioSugerido = 0;
 
-        if (precio < minimoGlobal) {
-            precio = minimoGlobal;
-            minimoAplicado = true;
+        if (margenPorcentaje < 100) {
+            colorMargen = "red";
+            mensajeMargen = "Margen bajo (estás ganando poco)";
+            precioSugerido = costoTotal * 2.5;
+        } else if (margenPorcentaje < 200) {
+            colorMargen = "orange";
+            mensajeMargen = "Margen aceptable";
+            precioSugerido = costoTotal * 3;
         } else {
-            minimoAplicado = false;
+            colorMargen = "green";
+            mensajeMargen = "Buen margen";
+            precioSugerido = costoTotal * 3.5;
         }
 
-        precio = Math.ceil(precio / 100) * 100;
+        precioSugerido = Math.ceil(precioSugerido / 100) * 100;
 
+        // ================= FINAL =================
+        precioSinRedondeoGlobal = precio;
+
+        precio = Math.ceil(precio / 100) * 100;
         precioFinal = precio;
 
+        // ================= UI =================
         document.getElementById("resultado").innerHTML = `
-            Filamento: $${costoMaterial.toFixed(0)}<br>
-            Luz: $${costoLuz.toFixed(0)}<br>
-            Desgaste: $${costoDesgaste.toFixed(0)}<br>
-            Trabajo: $${costoTrabajo.toFixed(0)}<br>
-            Fallos: $${costoFallos.toFixed(0)}<br>
-            <hr>
-            Tiempo total: ${tiempo.toFixed(2)} hs<br>
-            Costo total: $${costoTotal.toFixed(0)}
-        `;
+        Filamento: $${costoMaterial.toFixed(0)}<br>
+        Luz: $${costoLuz.toFixed(0)}<br>
+        Desgaste: $${costoDesgaste.toFixed(0)}<br>
+        Trabajo: $${costoTrabajo.toFixed(0)}<br>
+        Fallos: $${costoFallos.toFixed(0)}<br>
+        <hr>
+        Tiempo total: ${tiempo.toFixed(2)} hs<br>
+        Costo total: $${costoTotal.toFixed(0)}<br>
+        Multiplicador: x${multiplicador}<br>
+        <hr>
+        Ganancia: $${ganancia.toFixed(0)}<br>
+        
+        <span style="color:${colorMargen}; font-weight:bold;">
+            Margen: ${margenPorcentaje.toFixed(0)}%<br>
+            ${mensajeMargen}
+        </span>
+        
+<hr>
+<div style="
+    margin-top:15px;
+    padding:12px;
+    background:linear-gradient(#fc8332,#38bdf8,#fc8332);
+    color: #000;
+    border-radius:10px;
+    font-weight:bold;
+    text-align:center;
+">
+    💡 Precio sugerido: $${precioSugerido.toFixed(0)}
+</div>
+    `;
 
-        document.getElementById("precioFinal").innerText = "$" + precioFinal;
+        const precioEl = document.getElementById("precioFinal");
+
+        precioEl.innerText = "Precio Final $" + precioFinal;
+
+        precioEl.style.boxShadow = `0 0 15px ${colorMargen}`;
+        precioEl.style.fontWeight = "bold";
+        precioEl.style.fontSize = "42px";
+        precioEl.style.textAlign = "center";
+
+        // 🔥 reinicia animación
+        precioEl.classList.remove("pulse");
+        void precioEl.offsetWidth; // truco para reiniciar animación
+        precioEl.classList.add("pulse");
     }
 
     document.addEventListener("input", calcular);
-
 });
-
-
 
 // ================= PDF =================
 function generarPDF(e) {
@@ -175,9 +223,9 @@ function generarPDF(e) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-const cliente = (document.getElementById("cliente").value || "Cliente")
-    .trim()
-    .toUpperCase();
+    const cliente = (document.getElementById("cliente").value || "Cliente")
+        .trim()
+        .toUpperCase();
     const fecha = new Date().toLocaleDateString();
 
     let numero = localStorage.getItem("numeroPresupuesto");
@@ -206,13 +254,12 @@ const cliente = (document.getElementById("cliente").value || "Cliente")
         document.querySelectorAll(".producto-card").forEach((p) => {
             const h = parseFloat(p.querySelector(".horasProducto")?.value) || 0;
             const m = parseFloat(p.querySelector(".minutosProducto")?.value) || 0;
-            total += h + (m / 60);
+            total += h + m / 60;
         });
         return total;
     }
 
     function dibujarContenido(logoCargado, logoImg) {
-
         // ================= HEADER =================
         doc.setFillColor("#a3ccd3");
         doc.rect(0, 0, 210, 35, "F");
@@ -276,12 +323,12 @@ const cliente = (document.getElementById("cliente").value || "Cliente")
 
             const h = parseFloat(p.querySelector(".horasProducto")?.value) || 0;
             const m = parseFloat(p.querySelector(".minutosProducto")?.value) || 0;
-            const tiempoProducto = h + (m / 60);
+            const tiempoProducto = h + m / 60;
 
             const pesoTiempo = tiempoTotal > 0 ? tiempoProducto / tiempoTotal : 0;
             const pesoGramos = gramosTotales > 0 ? gramos / gramosTotales : 0;
 
-            const ponderacion = (pesoTiempo * 0.6) + (pesoGramos * 0.4);
+            const ponderacion = pesoTiempo * 0.6 + pesoGramos * 0.4;
             const precioProducto = precioFinal * ponderacion;
 
             if (y > 250) {
@@ -309,9 +356,10 @@ const cliente = (document.getElementById("cliente").value || "Cliente")
         if (descuentoGlobal > 0) {
             y += 8;
             doc.text(`Descuento (${descuentoGlobal}%):`, 120, y);
-            doc.text(`-$${montoDescuentoGlobal.toFixed(0)}`, 195, y, { align: "right" });
+            doc.text(`-$${montoDescuentoGlobal.toFixed(0)}`, 195, y, {
+                align: "right",
+            });
         }
-
 
         // ================= TOTAL FINAL (SIN REDONDEO) =================
         y += 10;
@@ -377,31 +425,6 @@ const cliente = (document.getElementById("cliente").value || "Cliente")
 }
 
 document.getElementById("pdf").addEventListener("click", generarPDF);
-
-// ================= WHATSAPP =================
-document.getElementById("whatsapp").addEventListener("click", () => {
-    if (precioFinal === 0) {
-        alert("Primero completá los datos");
-        return;
-    }
-
-    let mensaje = `📦 Presupuesto impresión 3D\n\n`;
-
-    document.querySelectorAll(".producto-card").forEach((p) => {
-        const nombre = p.querySelector(".nombreProducto")?.value || "Producto";
-        const gramos = p.querySelector(".gramosProducto")?.value || 0;
-        const h = p.querySelector(".horasProducto")?.value || 0;
-        const m = p.querySelector(".minutosProducto")?.value || 0;
-
-        mensaje += `• ${nombre} - ${gramos}g (${h}h ${m}m)\n`;
-    });
-
-    mensaje += `\n💰 Total: $${precioFinal}`;
-
-    const url =
-        "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
-    window.open(url, "_blank");
-});
 
 // ================= WHATSAPP =================
 document.getElementById("whatsapp").addEventListener("click", () => {

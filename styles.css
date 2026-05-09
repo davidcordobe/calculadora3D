@@ -96,19 +96,21 @@ button:hover {
     padding: 14px;
     border-radius: 12px;
     margin-bottom: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* FILA SUPERIOR */
 .fila-superior {
     display: flex;
-    gap: 10px; /* 👈 más aire */
+    gap: 10px;
+    /* 👈 más aire */
     align-items: center;
 }
 
 /* INPUTS GENERALES */
 .producto-card input {
-    padding: 10px 5px; /* 👈 clave */
+    padding: 10px 5px;
+    /* 👈 clave */
     border-radius: 8px;
     border: 1px solid #1e293b;
     background: #020617;
@@ -149,8 +151,10 @@ button:hover {
 /* FILA TIEMPO */
 .fila-tiempo {
     display: flex;
-    gap: 12px; /* 👈 más separación */
-    margin-top: 10px; /* 👈 más aire vertical */
+    gap: 12px;
+    /* 👈 más separación */
+    margin-top: 10px;
+    /* 👈 más aire vertical */
 }
 
 /* INPUTS TIEMPO */
@@ -193,4 +197,27 @@ button:hover {
     .grid {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* animación pulso */
+@keyframes pulsePrecio {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+.pulse {
+    animation: pulsePrecio 0.4s ease;
 }

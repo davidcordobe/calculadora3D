@@ -3,109 +3,118 @@
 
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculadora Impresión 3D</title>
+    <title>Calculadora Impresión 3D</title>
 
-<link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
 
-<!-- <link rel="manifest" href="manifest.json">
+    <!-- <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#020617">
 <link rel="apple-touch-icon" href="icon-192.png"> -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-<header>
-<img src="logo.png" class="logo">
-<h1>Norte, Nudo, Next</h1>
-</header>
+        <header>
+            <img src="logo.png" class="logo">
+            <h1>Norte, Nudo, Next</h1>
+        </header>
 
-<div class="grid">
+        <div class="grid">
 
-<div class="panel">
+            <div class="panel">
 
-<h3>Datos del trabajo</h3>
-
-
-<label>Cliente</label>
-<input id="cliente">
-
-<h3>Productos</h3>
-
-<div class="tablaProductos">
-
-<div class="fila encabezado">
-<div>Producto</div>
-<div>Gramos</div>
-<div></div>
-</div>
-
-<div id="productos"></div>
-
-</div>
-
-<button id="agregarProducto" type="button">+ Agregar producto</button>
-
-<label>Material</label>
-<select id="material"></select>
-
-<label>Descuento (%)</label>
-<input id="descuento" type="number" value="0">
-<button id="calcular" type="button">Calcular</button>
-
-<div id="resultado"></div>
-
-<h2 id="precioFinal"></h2>
+                <h3>Datos del trabajo</h3>
 
 
-<div id="cotizacion"></div>
+                <label>Cliente</label>
+                <input id="cliente">
 
-<button id="pdf" type="button">Descargar PDF</button>
+                <h3>Productos</h3>
 
-<button id="whatsapp" type="button">Enviar por WhatsApp</button>
+                <div class="tablaProductos">
 
-</div>
+                    <div class="fila encabezado">
+                        <div>Producto</div>
+                        <div>Gramos</div>
+                        <div></div>
+                    </div>
+
+                    <div id="productos"></div>
+
+                </div>
+
+                <button id="agregarProducto" type="button">+ Agregar producto</button>
+
+                <label>Material</label>
+                <select id="material"></select>
+
+                <label>Multiplicador</label>
+                <input id="multiplicador" type="number" value="4" step="0.1">
+
+                <small>
+                    • Mayorista → 3<br>
+                    • Minorista → 4<br>
+                    • Llaveros → 5
+                </small> <br>
+                <br>
+
+                <label>Descuento (%)</label>
+                <input id="descuento" type="number" value="0">
+                <button id="calcular" type="button">Calcular</button>
+
+                <div id="resultado"></div>
+
+                <h2 id="precioFinal"></h2>
 
 
-<div class="panel">
+                <div id="cotizacion"></div>
 
-<h3>Gastos</h3>
+                <button id="pdf" type="button">Descargar PDF</button>
 
-<label>Precio Kwh</label>
-<input id="precioLuz" value="500" readonly>
+                <button id="whatsapp" type="button">Enviar por WhatsApp</button>
 
-<label>Consumo impresora (W)</label>
-<input id="consumo" value="300" readonly>
+            </div>
 
-<label>Repuestos</label>
-<input id="repuestos" value="150000" readonly>
 
-<label>Vida útil (horas)</label>
-<input id="vida" value="4320" readonly>
+            <div class="panel">
 
-<label>Insumos</label>
-<input id="insumos" value="0">
+                <h3>Gastos</h3>
 
-<label>% fallos</label>
-<input id="fallos" value="20" readonly>
+                <label>Precio Kwh</label>
+                <input id="precioLuz" value="140" readonly>
 
-<label>Precio mínimo</label>
-<input id="minimo" value="2000" readonly>
+                <label>Consumo impresora (W)</label>
+                <input id="consumo" value="120" readonly>
 
-</div>
+                <label>Repuestos</label>
+                <input id="repuestos" value="150000" readonly>
 
-</div>
+                <label>Vida útil (horas)</label>
+                <input id="vida" value="4320" readonly>
 
-</div>
+                <label>Insumos</label>
+                <input id="insumos" value="0">
 
-<script src="./script.js" defer></script>
+                <label>% fallos</label>
+                <input id="fallos" value="5" readonly>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="./script.js" defer></script>
 
 </body>
+
 </html>
