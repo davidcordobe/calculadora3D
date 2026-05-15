@@ -261,20 +261,20 @@ function generarPDF(e) {
 
     function dibujarContenido(logoCargado, logoImg) {
         // ================= HEADER =================
-        doc.setFillColor("#a3ccd3");
+        doc.setFillColor("#FFC5D3");
         doc.rect(0, 0, 210, 35, "F");
 
         if (logoCargado && logoImg) {
             try {
-                doc.addImage(logoImg, "PNG", 155, 5, 40, 25);
+                doc.addImage(logoImg, "PNG", 165, 5, 25, 25);
             } catch { }
         }
 
         doc.setTextColor("#fc8332");
-        doc.setFontSize(18);
-        doc.text("Norte, Nudo, Next", 20, 20);
+        doc.setFontSize(20);
+        doc.text("Nina Store", 20, 20);
 
-        doc.setFontSize(10);
+        doc.setFontSize(15);
         doc.text("Impresión 3D Profesional", 20, 28);
 
         // ================= MARCA DE AGUA =================
@@ -364,7 +364,7 @@ function generarPDF(e) {
         // ================= TOTAL FINAL (SIN REDONDEO) =================
         y += 10;
 
-        doc.setFillColor("#a3ccd3");
+        doc.setFillColor("#FFC5D3");
         doc.rect(110, y, 90, 25, "F");
 
         doc.setTextColor("#fc8332");
@@ -384,8 +384,9 @@ function generarPDF(e) {
 
         doc.setFontSize(10);
         doc.text("Validez del presupuesto: 7 días", 20, 276);
-        doc.text("Tiempo estimado: 3 a 5 días", 20, 282);
+        doc.text("Tiempo estimado: 3 a 5 días habiles", 20, 282);
         doc.text("Contacto: 351-2715524", 200, 276, { align: "right" });
+        doc.text("Instagram:  @NINASTORE.CBA", 200, 285, { align: "right" });
 
         // ================= QR =================
         const mensajeQR = `Hola! Vi el presupuesto ${numeroPresupuesto} y quiero avanzar.`;
