@@ -6,10 +6,10 @@ let precioSinRedondeoGlobal = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   const materiales = {
-    "PLA ELEGOO": 24900,
-    "PETG ELEGOO": 23000,
-    "PLA 3NMAX": 20000,
-    "PLA GRILON3": 24900,
+    "PLA ELEGOO": 30000,
+    "PETG ELEGOO": 30000,
+    "PLA 3NMAX": 23000,
+    "PLA GRILON3": 26000,
   };
 
   const materialSelect = document.getElementById("material");
