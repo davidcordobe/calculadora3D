@@ -123,19 +123,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const costoTrabajo = tiempo * costoHora;
 
     const costoBase =
-      costoMaterial + costoLuz + costoDesgaste + insumos + costoTrabajo;
+      costoMaterial + costoLuz + costoDesgaste + costoTrabajo;
 
     const fallos = parseFloat(document.getElementById("fallos").value) || 0;
     const costoFallos = costoBase * (fallos / 100);
 
-    const costoTotal = costoBase + costoFallos;
+    const costoBaseConFallos = costoBase + costoFallos;
+
+    // costoTotal incluye insumos a valor real (sin recargo), sirve para saber la plata total que sale del bolsillo
+    const costoTotal = costoBaseConFallos + insumos;
 
     // ================= GANANCIA =================
     let multiplicador =
       parseFloat(document.getElementById("multiplicador").value) || 2;
     if (multiplicador < 2) multiplicador = 2;
 
-    precioConMargenGlobal = costoTotal * multiplicador;
+    // Los insumos se suman directo al precio, sin multiplicar
+    precioConMargenGlobal = costoBaseConFallos * multiplicador + insumos;
 
     descuentoGlobal =
       parseFloat(document.getElementById("descuento").value) || 0;
@@ -145,7 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ================= CALCULO REAL =================
     const ganancia = precio - costoTotal;
-    const margenPorcentaje = (ganancia / costoTotal) * 100;
+    // El % de margen se calcula solo sobre lo que vos multiplicás (material, luz, desgaste, trabajo, fallos).
+    // Los insumos quedan afuera porque son plata que pasás de largo sin ganancia, y si entraran acá
+    // te "diluyen" el % aunque tu ganancia real de negocio sea buena.
+    const margenPorcentaje = (ganancia / costoBaseConFallos) * 100;
 
     // ================= ANALISIS PRO =================
     let colorMargen = "";
@@ -155,15 +162,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (margenPorcentaje < 100) {
       colorMargen = "red";
       mensajeMargen = "Margen bajo (estás ganando poco)";
-      precioSugerido = costoTotal * 2.5;
+      precioSugerido = costoBaseConFallos * 2.5 + insumos;
     } else if (margenPorcentaje < 200) {
       colorMargen = "orange";
       mensajeMargen = "Margen aceptable";
-      precioSugerido = costoTotal * 3;
+      precioSugerido = costoBaseConFallos * 3 + insumos;
     } else {
       colorMargen = "green";
       mensajeMargen = "Buen margen";
-      precioSugerido = costoTotal * 3.5;
+      precioSugerido = costoBaseConFallos * 3.5 + insumos;
     }
 
     precioSugerido = Math.ceil(precioSugerido / 100) * 100;
@@ -181,6 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Desgaste: $${costoDesgaste.toFixed(0)}<br>
         Trabajo: $${costoTrabajo.toFixed(0)}<br>
         Fallos: $${costoFallos.toFixed(0)}<br>
+        Insumos (sin recargo): $${insumos.toFixed(0)}<br>
         <hr>
         Tiempo total: ${tiempo.toFixed(2)} hs<br>
         Costo total: $${costoTotal.toFixed(0)}<br>
