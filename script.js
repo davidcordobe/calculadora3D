@@ -259,6 +259,13 @@ function generarPDF(e) {
 
     const numeroPresupuesto = "P-" + new Date().getFullYear() + "-" + String(numero).padStart(4, "0");
 
+    const clienteArchivo = cliente
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // saca tildes
+        .replace(/[^a-zA-Z0-9]+/g, "_") // espacios y símbolos raros -> _
+        .replace(/^_+|_+$/g, "") || "CLIENTE"; // si queda vacío, usa un default
+
+    const nombreArchivo = "presupuesto-" + clienteArchivo + "-" + numeroPresupuesto + ".pdf";
+
     function obtenerGramosTotalesPDF() {
         let total = 0;
         document.querySelectorAll(".gramosProducto").forEach((input) => {
@@ -306,25 +313,42 @@ function generarPDF(e) {
             doc.rect(0, 0, 210, 35, "F");
 
             if (logoCargado && logoImg) {
-                try { doc.addImage(logoImg, "PNG", 165, 5, 25, 25); } catch {}
+                try {
+                    // El logo es un banner ancho (~2.6:1), le damos más ancho que alto
+                    const maxW = 55, maxH = 28;
+                    const ratio = logoImg.width / logoImg.height;
+                    let w = maxW, h = maxW / ratio;
+                    if (h > maxH) { h = maxH; w = maxH * ratio; }
+                    const x = 195 - w; // pegado al margen derecho
+                    const y = 5 + (maxH - h) / 2;
+                    doc.addImage(logoImg, "PNG", x, y, w, h);
+                } catch {}
             }
 
             doc.setTextColor("#fc8332");
             doc.setFontSize(20);
-            doc.text("Nina Store", 20, 20);
+            doc.text("Yanina Creativa", 20, 20);
             doc.setFontSize(15);
             doc.text("Impresión 3D Profesional", 20, 28);
 
             // ================= MARCA DE AGUA =================
             if (logoCargado && logoImg && doc.GState) {
                 try {
-                    doc.setGState(new doc.GState({ opacity: 0.08 }));
-                    doc.addImage(logoImg, "PNG", 40, 80, 130, 130);
+                    const maxW = 150, maxH = 150;
+                    const ratio = logoImg.width / logoImg.height;
+                    let w = maxW, h = maxW / ratio;
+                    if (h > maxH) { h = maxH; w = maxH * ratio; }
+                    const x = (210 - w) / 2;
+                    const y = (297 - h) / 2;
+
+                    doc.setGState(new doc.GState({ opacity: 0.05 }));
+                    doc.addImage(logoImg, "PNG", x, y, w, h);
                     doc.setGState(new doc.GState({ opacity: 1 }));
                 } catch {}
             }
 
             doc.setTextColor(0);
+
 
             // ================= DATOS =================
             doc.setFillColor(241, 245, 249);
@@ -447,7 +471,7 @@ function generarPDF(e) {
             doc.text("Validez del presupuesto: 7 días", 20, 276);
             doc.text("Tiempo estimado: 3 a 5 días habiles", 20, 282);
             doc.text("Contacto: 351-2715524", 200, 276, { align: "right" });
-            doc.text("Instagram:  @NINASTORE.CBA", 200, 285, { align: "right" });
+            doc.text("Instagram:  @yaninacreativa", 200, 285, { align: "right" });
 
             // ================= QR =================
             const mensajeQR = `Hola! Vi el presupuesto ${numeroPresupuesto} y quiero avanzar.`;
@@ -462,10 +486,10 @@ function generarPDF(e) {
                     doc.setFontSize(8);
                     doc.text("Escaneá para contactarnos", 160, 222);
                 } catch {}
-                doc.save("presupuesto-" + numeroPresupuesto + ".pdf");
+                doc.save(nombreArchivo);
             };
             qrImg.onerror = function () {
-                doc.save("presupuesto-" + numeroPresupuesto + ".pdf");
+                doc.save(nombreArchivo);
             };
             qrImg.src = qrURL;
         }
