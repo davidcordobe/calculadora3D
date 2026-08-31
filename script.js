@@ -8,8 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const materiales = {
     "PLA ELEGOO": 30000,
     "PETG ELEGOO": 30000,
-    "PLA 3NMAX": 23000,
-    "PLA GRILON3": 26000,
+    "PLA 3NMAX": 24000,
+    "PLA GRILON3": 27000,
   };
 
   const materialSelect = document.getElementById("material");
